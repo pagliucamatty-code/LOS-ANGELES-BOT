@@ -10,7 +10,7 @@ from datetime import datetime
 # CONFIGURAZIONE & GESTIONE TOKEN / RUOLO FDO
 # ==============================================================================
 
-NOME_RUOLO_FDO = "FdO"  # Modifica con il nome esatto del ruolo nel tuo server (es. "Polizia")
+NOME_RUOLO_FDO = "FdO"  # 1544460755884187705
 
 def get_bot_token():
     token = os.getenv("DISCORD_BOT_TOKEN")
