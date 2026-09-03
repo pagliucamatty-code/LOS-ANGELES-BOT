@@ -14,7 +14,7 @@ from datetime import datetime
 
 # --- RICHIESTA / CARICAMENTO TOKEN BOT ---
 def get_bot_token():
-    # Cerca prima il token nelle variabili d'ambiente (utile per l'hosting)
+    # MTUzODY1MDg3NjE2NjgwNzU5Mg.GSs9Y3.Yp942RIYDBnEK8US9x3UaqR5DOchEiL0lNbJaI(utile per l'hosting)
     token = os.getenv("DISCORD_BOT_TOKEN")
     if token and token.strip():
         print("✅ Token trovato nelle variabili d'ambiente!")
