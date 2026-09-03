@@ -76,13 +76,10 @@ def registra_sanzione(user_id: str, tipo: str, dettagli: dict):
         db[user_id] = {
             "multe": [], 
             "arresti": [], 
-            "permajail": None,
             "revoche": []
         }
     
-    if tipo == "permajail":
-        db[user_id]["permajail"] = dettagli
-    elif tipo == "revoche":
+    if tipo == "revoche":
         db[user_id]["revoche"].append(dettagli)
     else:
         db[user_id][tipo].append(dettagli)
@@ -218,7 +215,7 @@ async def revoca_porto_darmi(interaction: discord.Interaction, utente: discord.U
     await interaction.response.send_message(content=f"⚠️ {utente.mention}, il tuo **Porto d'Armi** è stato revocato!", embed=embed)
 
 
-# --- 4. COMANDO ARRESTO ---
+# --- 4. COMANDO ARRESTO TEMPORANEO ---
 @bot.tree.command(name="arresto", description="Registra l'arresto temporaneo di un cittadino.")
 @app_commands.describe(
     utente="Il cittadino da arrestare",
@@ -255,39 +252,7 @@ async def arresto(interaction: discord.Interaction, utente: discord.User, mesi: 
     await interaction.response.send_message(content=f"🔒 {utente.mention} è stato tratto in arresto!", embed=embed)
 
 
-# --- 5. COMANDO PERMAJAIL ---
-@bot.tree.command(name="permajail", description="Registra il Permajail (Carcere a vita / Esecuzione) di un cittadino.")
-@app_commands.describe(
-    utente="Il cittadino da condannare al Permajail",
-    motivo="Motivazione penale grave o ordine giudiziario"
-)
-@check_is_fdo()
-async def permajail(interaction: discord.Interaction, utente: discord.User, motivo: str):
-    dettagli = {
-        "agente_id": interaction.user.id,
-        "agente_nome": interaction.user.display_name,
-        "motivo": motivo,
-        "data": datetime.now().strftime("%d/%m/%Y - %H:%M")
-    }
-
-    registra_sanzione(str(utente.id), "permajail", dettagli)
-
-    embed = discord.Embed(
-        title="⛔ SENTENZA DI PERMAJAIL (ERGASTOLO)",
-        description="**Il soggetto è stato condannato alla detenzione permanente / Fine del personaggio.**",
-        color=discord.Color.dark_red(),
-        timestamp=datetime.now()
-    )
-    embed.set_thumbnail(url=utente.display_avatar.url)
-    embed.set_author(name=f"Autorità: {interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
-    embed.add_field(name="Condannato", value=f"{utente.mention} (`{utente.display_name}`)", inline=False)
-    embed.add_field(name="Motivazione Sentenza", value=f"```\n{motivo}\n```", inline=False)
-    embed.set_footer(text="Corte Suprema di Giustizia • Inappellabile")
-
-    await interaction.response.send_message(content=f"☠️ **SENTENZA ESEGUITA PER {utente.mention}**", embed=embed)
-
-
-# --- 6. COMANDO FEDINA PENALE ---
+# --- 5. COMANDO FEDINA PENALE ---
 @bot.tree.command(name="fedina_penale", description="Visualizza lo storico sanzioni, arresti e revoche di un cittadino.")
 @app_commands.describe(utente="Il cittadino da controllare")
 @check_is_fdo()
@@ -295,7 +260,7 @@ async def fedina_penale(interaction: discord.Interaction, utente: discord.User):
     db = load_fdo_data()
     user_id = str(utente.id)
 
-    if user_id not in db or (not db[user_id]["multe"] and not db[user_id]["arresti"] and not db[user_id]["permajail"] and not db[user_id].get("revoche")):
+    if user_id not in db or (not db[user_id]["multe"] and not db[user_id]["arresti"] and not db[user_id].get("revoche")):
         await interaction.response.send_message(f"✅ La fedina penale di **{utente.display_name}** è pulita.", ephemeral=True)
         return
 
@@ -306,15 +271,6 @@ async def fedina_penale(interaction: discord.Interaction, utente: discord.User):
         timestamp=datetime.now()
     )
     embed.set_thumbnail(url=utente.display_avatar.url)
-
-    # Stato Permajail
-    if record.get("permajail"):
-        pj = record["permajail"]
-        embed.add_field(
-            name="⛔ STATO: PERMAJAIL ATTIVO",
-            value=f"**Motivo:** {pj['motivo']}\n**Data:** {pj['data']}\n**Agente:** {pj['agente_nome']}",
-            inline=False
-        )
 
     # Storico Revoche Documenti
     if record.get("revoche"):
